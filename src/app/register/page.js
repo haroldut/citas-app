@@ -4,12 +4,12 @@ import {redirect} from 'next/navigation';
 import axios from "axios";
 
 export default function Home() {
-  const [formData, setFormData] = useState({email: "",password: ""});
-  const [isLogged, setIsLogged] = useState(false);
-  const [hasErrors, setHasErrors] = useState(false);
+  const [formData, setFormData] = useState({name:"", email: "",password: ""});
+  const [isCreated, setIsCreated] = useState(false);
+  const [errors, setErrors] = useState(null);
 
   const handleChange = (event) => {
-    setHasErrors(false);
+    setErrors(null);
     const { name, value } = event.target;
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
@@ -30,24 +30,23 @@ export default function Home() {
   }, []); 
 
   useEffect(() => {
-    if (isLogged) {
-        redirect('/dashboard');
+    if (isCreated) {
+        redirect('/');
     }
-  }, [isLogged]); 
+  }, [isCreated]);
 
-  const login = async () => {  
-    axios.post('http://localhost/api/login', formData, {
+  const register = async () => {  
+    axios.post('http://localhost/api/register', formData, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       })
-      .then(function (res) {
-        window.localStorage.setItem('token', res.data.access_token);
-        setIsLogged(true);
+      .then(function () {
+        setIsCreated(true);
       })
       .catch(function (err) {
-        setHasErrors(true);
+        setErrors(err.response.data.errors);
       });
   }
 
@@ -68,7 +67,30 @@ export default function Home() {
             <form>
               <div
                 className="flex flex-row mb-6 items-center justify-center lg:justify-start">
-                <p className="mb-0 me-4 text-lg">Login</p>
+                <p className="mb-0 me-4 text-lg">Register</p>
+              </div>
+
+              <div className="relative mb-6">
+                <label
+                  htmlFor="email"
+                  >Email
+                </label>
+                <input
+                  type="text"
+                  className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15]"
+                  id="name"
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name} 
+                  onChange={handleChange}
+                  />
+                {!!errors && errors.name && <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
+                    <a
+                        href="#!"
+                        className="text-red-600 pl-1 transition duration-150 ease-in-out"
+                        >{errors.name}</a
+                    >
+                </p>}
               </div>
 
               <div className="relative mb-6">
@@ -81,14 +103,21 @@ export default function Home() {
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15]"
                   id="email"
                   name="email"
-                  placeholder="Email address"
+                  placeholder="Email"
                   value={formData.email} 
                   onChange={handleChange}
                   />
+                {!!errors && errors.email && <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
+                    <a
+                        href="#!"
+                        className="text-red-600 pl-1 transition duration-150 ease-in-out"
+                        >{errors.email}</a
+                    >
+                </p>}
               </div>
 
               <div className="relative mb-6">
-              <label
+                <label
                   htmlFor="password"
                   >Password
                 </label>
@@ -101,33 +130,31 @@ export default function Home() {
                   value={formData.password} 
                   onChange={handleChange}
                   />
+                {!!errors && errors.password && <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
+                    <a
+                        href="#!"
+                        className="text-red-600 pl-1 transition duration-150 ease-in-out"
+                        >{errors.password}</a
+                    >
+                </p>}
               </div>
               
               <div className="text-center lg:text-left">
                 <button
                   type="button"
                   className="inline-block w-full rounded bg-blue-300 px-7 pb-2 pt-3 text-sm font-medium uppercase leading-normal text-black shadow-primary-3"
-                  onClick={() => login()}
+                  onClick={() => register()}
                   >
-                  Login
+                  Register
                 </button>
 
                 <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
                   <a
                     href="#!"
                     className="text-black pl-1 transition duration-150 ease-in-out"
-                    onClick={() => redirect('/register')}
-                    >To create an account, click here to go to register</a
-                  >
+                    onClick={() => redirect('/')}
+                    >If you already have an account, click here to go to login</a>
                 </p>
-
-                {!!hasErrors && <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
-                  <a
-                    href="#!"
-                    className="text-red-600 pl-1 transition duration-150 ease-in-out"
-                    >Email or Password are invalid</a
-                  >
-                </p>}
               </div>
             </form>
           </div>
